@@ -23,6 +23,12 @@ _testmain.go
 *.test
 *.prof
 
+# glide deps dir
 vendor
+
+# coverage stuff
 cover
 cover.out
+
+# swap files
+*.swp
