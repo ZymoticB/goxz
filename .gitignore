@@ -32,3 +32,6 @@ cover.out
 
 # swap files
 *.swp
+
+# binary
+goxz
