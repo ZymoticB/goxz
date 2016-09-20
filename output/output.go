@@ -27,26 +27,31 @@ import (
 	"os"
 )
 
-type output interface {
+type Output interface {
 	io.Writer
 
 	Fatal(v ...interface{})
+	Print(v ...interface{})
 	Fatalf(format string, args ...interface{})
 	Printf(format string, args ...interface{})
 }
 
-type consoleOutput struct {
+type ConsoleOutput struct {
 	*os.File
 }
 
-func (consoleOutput) Fatal(v ...interface{}) {
+func (ConsoleOutput) Fatal(v ...interface{}) {
 	log.Fatal(v...)
 }
 
-func (consoleOutput) Fatalf(format string, args ...interface{}) {
+func (ConsoleOutput) Fatalf(format string, args ...interface{}) {
 	log.Fatalf(format, args...)
 }
 
-func (consoleOutput) Printf(format string, args ...interface{}) {
+func (ConsoleOutput) Printf(format string, args ...interface{}) {
 	fmt.Printf(format, args...)
+}
+
+func (ConsoleOutput) Print(args ...interface{}) {
+	fmt.Print(args...)
 }

@@ -18,10 +18,10 @@ var errExit = errors.New("sentinel error used to exit cleanly")
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	parseAndRun(consoleOutput{os.Stdout})
+	parseAndRun(output.ConsoleOutput{os.Stdout})
 }
 
-func parseAndRun(out output) {
+func parseAndRun(out output.Output) {
 	opts, err := getOptions(os.Args[1:], out)
 	if err != nil {
 		if err == errExit {
@@ -32,7 +32,7 @@ func parseAndRun(out output) {
 	runWithOptions(*opts, out)
 }
 
-func getMethod(opts Options, out output) string {
+func getMethod(opts Options, out output.Output) string {
 	method := opts.GOpts.Method
 	if method != "" {
 		return method
@@ -67,7 +67,7 @@ func getMethod(opts Options, out output) string {
 	return method
 }
 
-func runWithOptions(opts Options, out output) {
+func runWithOptions(opts Options, out output.Output) {
 	method := getMethod(opts, out)
 
 	inputFilePath := opts.FOpts.Input
@@ -83,7 +83,7 @@ func runWithOptions(opts Options, out output) {
 	}
 
 	if method == "decompress" {
-		err := decompress.RunDecompress(inputFilePath, outputFilePath)
+		err := decompress.RunDecompress(inputFilePath, outputFilePath, out)
 		if err != nil {
 			out.Fatalf("Failed while running compress: %v", err)
 		} else {
@@ -95,6 +95,9 @@ func runWithOptions(opts Options, out output) {
 		inputIsXZ := strings.HasSuffix(inputFilePath, ".xz")
 		if inputIsXZ {
 			err := xz.OpenFile(inputFilePath)
+			if err != nil {
+				out.Fatalf("Failed while reading headers: %v", err)
+			}
 			os.Exit(0)
 		} else {
 			out.Fatalf("Headers command requires input file to be in xz format")
@@ -108,7 +111,7 @@ func newParser() (*flags.Parser, *Options) {
 	return flags.NewParser(opts, flags.HelpFlag|flags.PassDoubleDash), opts
 }
 
-func getOptions(args []string, out output) (*Options, error) {
+func getOptions(args []string, out output.Output) (*Options, error) {
 	parser, opts := newParser()
 	parser.Usage = "-i <file>.xz -o <file> -m decompress"
 	parser.ShortDescription = "LZMA2 based [de]compressor"
